@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1nbw_2L8E0VNCBdl8Tb1dJs3fwMtTwe4h
 """
 
-from zipfile import ZipFile                  # code to extract zipped files. i copied this from stack exchange
+from zipfile import ZipFile                  # code to extract zipped files. i copied this from stack exchange.
 file_name = './New_Data.zip'
 
 with ZipFile(file_name, 'r') as zip:
