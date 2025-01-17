@@ -1,10 +1,10 @@
-!pip install opendatasets																												# opendatasets is a library used to download dataset from kaggle
+!pip install opendatasets        # opendatasets is a library used to download dataset from kaggle
 import opendatasets as od
 dataset_url = 'https://www.kaggle.com/competitions/induction-task/data'
 od.download('https://www.kaggle.com/competitions/induction-task/data')
 
 
-import os																																				# importing libraries
+import os         # importing libraries
 import torch
 import torchvision
 import tarfile
@@ -15,24 +15,22 @@ from torchvision.transforms import ToTensor, Resize, Compose
 import numpy as np
 
 
-data_dir = "./induction-task/Data/Train/"																					# creating train and validation datasets
-dataset = ImageFolder(data_dir, transform=Compose([ToTensor(),
-																									 Resize(size = 512)
-																									]))
-random_seed = 2217828																															# set 50 images as validation images. these images will not be included in
-torch.manual_seed(random_seed)																										# train dataset, so that model doesnt learn on these images.
+data_dir = "./induction-task/Data/Train/"           # creating train and validation datasets
+dataset = ImageFolder(data_dir, transform=Compose([ToTensor(), Resize(size = 512)]))
+random_seed = 2217828                 # set 50 images as validation images. these images will not be included in
+torch.manual_seed(random_seed)        # train dataset, so that model doesnt learn on these images.
 val_size = 50
 train_size = len(dataset) - val_size
 train_ds, val_ds = random_split(dataset, [train_size, val_size])
 
-from torch.utils.data.dataloader import DataLoader																# making the dataloader
+from torch.utils.data.dataloader import DataLoader        # making the dataloader
 batch_size=20
 train_dl = DataLoader(train_ds, batch_size = batch_size, shuffle = True)
 val_dl = DataLoader(val_ds, batch_size = batch_size*2, shuffle = False)
 
 #defining the model
 import torch.nn as nn
-import torch.nn.functional as F																										# model has 10 convolution layers and 8 feedforward layers
+import torch.nn.functional as F        # model has 10 convolution layers and 8 feedforward layers
 
 leaky_param = 0.2
 
@@ -95,7 +93,7 @@ class ConvModel(nn.Module):
 
 model = ConvModel()
 
-######################################## This code is to shift data from cpu to gpu. i copied it from google ###################################
+######################################## This code is to shift data from cpu to gpu. i copied it from google ########################################
 def get_default_device():
     """Pick GPU if available, else CPU"""
     if torch.cuda.is_available():
@@ -129,17 +127,17 @@ device = get_default_device()
 train_dl = DeviceDataLoader(train_dl, device)
 val_dl = DeviceDataLoader(val_dl, device)
 model = model.to(device = device)
-#######################################################################################################################3
+##########################################################################################################################################################
 
 
-def accuracy(outputs, labels):																							# defining accuracy function
+def accuracy(outputs, labels):           # defining accuracy function
     preds = torch.round(outputs)
     return torch.tensor(torch.sum(preds.float() == labels.float()).item() / len(preds))
 
-def fit(epochs, lr, model, traindataloader, valdataloader, opt_func = torch.optim.SGD):					# training loop. i used binary cross entropy loss function.
-    loss_history = []																																						# accuracy and losses and stored and returned when execution is completed
-    acc_history = []																																						# there is bad coding involved because i wrote it and im not experienced with python
-    optimizer = opt_func(model.parameters(), lr)																								# later i changed the optimizer function to Adam with betas 0.5 and 0.9
+def fit(epochs, lr, model, traindataloader, valdataloader, opt_func = torch.optim.SGD):      # training loop. i used binary cross entropy loss function.
+    loss_history = []      # accuracy and losses and stored and returned when execution is completed
+    acc_history = []       # there is bad coding involved because i wrote it and im not experienced with python
+    optimizer = opt_func(model.parameters(), lr)      # later i changed the optimizer function to Adam with betas 0.5 and 0.9
     for epoch in range(epochs):
         model.train()
         train_losses = []
@@ -164,7 +162,7 @@ def fit(epochs, lr, model, traindataloader, valdataloader, opt_func = torch.opti
 
     return loss_history, acc_history
 
-@torch.no_grad()																																	# evaluate function. it takes images from validation set. model is not trained here
+@torch.no_grad()      # evaluate function. it takes images from validation set. model is not trained here
 def evaluate(model, valdataloader):
     model.eval()
     val_losses = []
@@ -180,13 +178,14 @@ def evaluate(model, valdataloader):
     print("Val_Loss:   ", np.round(np.mean(val_losses), 3), "   Val_Acc:   ", np.round(np.mean(val_accuracy), 3))
 
 ######################################################## Copied from ChatGPT #############################################################
-import gc																								# this code is to empty gpu ram. i frequently got out of memory error so i used this to make some space	
+import gc      # this code is to empty gpu ram. i frequently got out of memory error so i used this to make some space	
 torch.cuda.empty_cache()
 gc.collect()
 #############################################################################################################################################
 
 
-loss_history, acc_history= fit(epochs = 10, lr = 1e-4, model = model, traindataloader = train_dl, valdataloader = val_dl, opt_func = torch.optim.Adam)  # executing the training loop
+loss_history, acc_history= fit(epochs = 10, lr = 1e-4, model = model, traindataloader = train_dl, valdataloader = val_dl, opt_func = torch.optim.Adam)
+# executing the training loop
 
 
 
